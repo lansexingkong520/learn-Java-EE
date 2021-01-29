@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.c.pet.dao.TbOrderDao">
+
+    <resultMap type="com.c.pet.entity.TbOrder" id="TbOrderMap">
+        <result property="oId" column="o_id" jdbcType="INTEGER"/>
+        <result property="uId" column="u_id" jdbcType="INTEGER"/>
+        <result property="suId" column="su_id" jdbcType="INTEGER"/>
+        <result property="dur" column="dur" jdbcType="OTHER"/>
+        <result property="message" column="message" jdbcType="VARCHAR"/>
+        <result property="uname" column="uname" jdbcType="VARCHAR"/>
+        <result property="tel" column="tel" jdbcType="VARCHAR"/>
+        <result property="suname" column="suname" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+<!--查询订单个数-->
+    <select id="countById" resultType="java.lang.Integer">
+        select
+         count(*)
+        from db_hospital.tb_order
+    </select>
+    <!--查询单个-->
+    <select id="queryById" resultMap="TbOrderMap">
+        select
+          o_id, u_id, su_id, dur, message, uname, tel,suname
+        from db_hospital.tb_order
+        where o_id = #{oId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="TbOrderMap">
+        select
+          o_id, u_id, su_id, dur, message, uname, tel,suname
+        from db_hospital.tb_order
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="TbOrderMap">
+        select
+        o_id, u_id, su_id, dur, message, uname, tel,suname
+        from db_hospital.tb_order
+        <where>
+            <if test="oId != null">
+                and o_id = #{oId}
+            </if>
+            <if test="uId != null">
+                and u_id = #{uId}
+            </if>
+            <if test="suId != null">
+                and su_id = #{suId}
+            </if>
+            <if test="dur != null">
+                and dur = #{dur}
+            </if>
+            <if test="message != null and message != ''">
+                and message = #{message}
+            </if>
+            <if test="uname != null and uname != ''">
+                and uname = #{uname}
+            </if>
+            <if test="tel != null and tel != ''">
+                and tel = #{tel}
+            </if>
+            <if test="suname != null and suname != ''">
+                and suname = #{suname}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="oId" useGeneratedKeys="true">
+        insert into db_hospital.tb_order(u_id, su_id, dur, message, uname, tel,suname)
+        values (#{uId}, #{suId}, #{dur}, #{message}, #{uname}, #{tel},#{suname})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="oId" useGeneratedKeys="true">
+        insert into db_hospital.tb_order(u_id, su_id, dur, message, uname, tel,suname)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.uId}, #{entity.suId}, #{entity.dur}, #{entity.message}, #{entity.uname}, #{entity.tel},#{entity.suname})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="oId" useGeneratedKeys="true">
+        insert into db_hospital.tb_order(u_id, su_id, dur, message, uname, tel,suname)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.uId}, #{entity.suId}, #{entity.dur}, #{entity.message}, #{entity.uname}, #{entity.tel},#{entity.suname})
+        </foreach>
+        on duplicate key update
+        u_id = values(u_id) , su_id = values(su_id) , dur = values(dur) , message = values(message) , uname =
+        values(uname) , tel = values(tel),suname =values(suname)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update db_hospital.tb_order
+        <set>
+            <if test="uId != null">
+                u_id = #{uId},
+            </if>
+            <if test="suId != null">
+                su_id = #{suId},
+            </if>
+            <if test="dur != null">
+                dur = #{dur},
+            </if>
+            <if test="message != null and message != ''">
+                message = #{message},
+            </if>
+            <if test="uname != null and uname != ''">
+                uname = #{uname},
+            </if>
+            <if test="tel != null and tel != ''">
+                tel = #{tel},
+            </if>
+
+        <if test="suname != null and suname != ''">
+            suname = #{suname},
+        </if>
+        </set>
+        where o_id = #{oId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from db_hospital.tb_order where o_id = #{oId}
+    </delete>
+
+    <select id="countByLike" resultType="java.lang.Integer">
+        select count(o_id) from tb_order
+        where
+        tb_order.suname like concat("%",#{value},"%")
+        or tb_order.uname like concat("%",#{value},"%")
+    </select>
+
+    <!--模糊查询-->
+    <select id="queryByLike" resultMap="TbOrderMap">
+        select
+          o_id, u_id, su_id, dur, message, uname, tel,suname
+        from db_hospital.tb_order
+         where
+        tb_order.suname like concat("%",#{value},"%")
+        or tb_order.uname like concat("%",#{value},"%")
+        limit #{page},#{limit}
+    </select>
+
+</mapper>

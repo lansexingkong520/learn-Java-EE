@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>order</title>
+    <link rel="stylesheet" type="text/css" href="layui/css/layui.css"/>
+</head>
+
+<body>
+<!--搜索栏-->
+<div class="demoTable">
+    <div class="layui-inline">
+        <input class="layui-input" name="conditions" id="conditions" autocomplete="off">
+    </div>
+    <button class="layui-btn" id="search">搜索</button>
+</div>
+
+<table class="layui-hide" id="order" lay-filter="test"></table>
+<!--自定义行工具栏-->
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<!--自定义头工具栏-->
+<script type="textml" id="toolbarDemo">
+    <button type="button" lay-event="delete" class="layui-btn layui-btn-primary layui-btn-sm">
+        <i class="layui-icon">&#xe640;</i>
+    </button>
+</script>
+</body>
+<script type="text/javascript" src="layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['table', 'form'], function () {
+        var table = layui.table,
+            form = layui.form,
+            $ = layui.jquery;
+        //执行一个 table 实例
+        var tableIns = table.render({
+            elem: '#order',
+            height: 600,
+            url: '/tbOrder/queryAll' //数据接口
+            ,
+            title: '预约信息',
+            page: true //开启分页
+            ,
+            toolbar: '#toolbarDemo' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            ,
+            cols: [
+                [ //表头
+                    {
+                        type: 'checkbox',
+                        fixed: 'left'
+                    }, {
+                    field: 'oid',
+                    title: 'ID',
+                    sort: true,
+                    fixed: 'left',
+                    align: 'center'
+                },  {
+                        field: 'suname',
+                        title: '项目名字',
+                        align: 'center'
+                    }, {
+                    field: 'message',
+                    title: '留言',
+                    align: 'center',
+                    edit: 'text'
+                }, {
+                    field: 'dur',
+                    title: '预约时间',
+                    align: 'center',
+
+                }, {
+                    field: 'uname',
+                    title: '用户',
+                    align: 'center'
+                }, {
+                    field: 'tel',
+                    title: '联系电话',
+                    align: 'center'
+
+                }, {
+                    fixed: 'right',
+                    width: 165,
+                    align: 'center',
+                    title: '操作',
+                    toolbar: '#barDemo'
+                }
+                ]
+            ]
+        });
+
+        // 头工具栏事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);   //获取选中行状态
+            var data = checkStatus.data;
+            var layEvent = obj.event; //获得 lay-event 对应的值
+            console.log(data);
+            if (layEvent === 'delete') {
+                layer.confirm('真的删除选中行么', function (index) {
+                    layer.close(index);
+                    //向服务端发送删除指令
+                    $.ajax({
+                        type: "POST",
+                        url: "http://localhost:8080/tbOrder/delOrderAll",
+                        dataType: 'json',
+                        data: JSON.stringify(data),
+                        contentType: 'application/json',
+                        success: function (res) {
+                            //请求成功以后的回调函数
+                            if (res.code == 200) {
+                                layer.msg(res.msg, {icon: 1})
+                                window.location.reload();
+                            } else {
+                                layer.msg(res.msg, {icon: 2})
+                            }
+                        }
+                    })
+                });
+            }
+        });
+
+        //监听行工具栏事件
+        table.on('tool(test)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+
+                    //向服务端发送删除指令
+                    $.ajax({
+                        type: "DELETE",
+                        url: "http://localhost:8080/tbOrder/delOrder/" + data.oid,
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        success: function (res) {
+                            if (res.code == 200) {
+                                obj.del(); //删除对应行（tr）的DOM结构
+                                layer.msg(res.msg, {icon: 1});
+                                layer.close(index);
+                            } else {
+                                layer.msg(res.msg, {icon: 2});
+                                layer.close(index);
+                            }
+                        }
+
+                    })
+
+
+                });
+            }
+        });
+
+        //table重载
+        $("#search").on('click', function () {
+
+            tableIns.reload({
+                url: "http://localhost:8080/tbOrder/queryByLike",
+                where: { //设定异步数据接口的额外参数，任意设
+                    value: $("#conditions").val()
+                }
+                , page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            });
+        })
+
+    })
+</script>
+
+</html>

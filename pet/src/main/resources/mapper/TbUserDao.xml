@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.c.pet.dao.TbUserDao">
+
+    <resultMap type="com.c.pet.entity.TbUser" id="TbUserMap">
+        <result property="uId" column="u_id" jdbcType="INTEGER"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="pId" column="p_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="queryByUname" resultMap="TbUserMap">
+        select
+          u_id, username, password, u.p_id, url
+        from db_hospital.tb_user u,db_hospital.tb_pic p
+        where  u.p_id=p.p_id AND username = #{uname}
+    </select>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="TbUserMap">
+        select
+          u_id, username, password, p_id
+        from db_hospital.tb_user
+        where u_id = #{uId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="TbUserMap">
+        select
+          u_id, username, password, p_id
+        from db_hospital.tb_user
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="TbUserMap">
+        select
+        u_id, username, password, p_id
+        from db_hospital.tb_user
+        <where>
+            <if test="uId != null">
+                and u_id = #{uId}
+            </if>
+            <if test="username != null and username != ''">
+                and username = #{username}
+            </if>
+            <if test="password != null and password != ''">
+                and password = #{password}
+            </if>
+            <if test="pId != null">
+                and p_id = #{pId}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="uId" useGeneratedKeys="true">
+        insert into db_hospital.tb_user(username, password, p_id)
+        values (#{username}, #{password}, #{pId})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="uId" useGeneratedKeys="true">
+        insert into db_hospital.tb_user(username, password, p_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.username}, #{entity.password}, #{entity.pId})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="uId" useGeneratedKeys="true">
+        insert into db_hospital.tb_user(username, password, p_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.username}, #{entity.password}, #{entity.pId})
+        </foreach>
+        on duplicate key update
+        username = values(username) , password = values(password) , p_id = values(p_id)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update db_hospital.tb_user
+        <set>
+            <if test="username != null and username != ''">
+                username = #{username},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="pId != null">
+                p_id = #{pId},
+            </if>
+        </set>
+        where u_id = #{uId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from db_hospital.tb_user where u_id = #{uId}
+    </delete>
+
+</mapper>

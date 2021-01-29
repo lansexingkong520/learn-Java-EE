@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.c.pet.dao.TbCourseDao">
+
+    <resultMap type="com.c.pet.entity.TbCourse" id="TbCourseMap">
+        <result property="cId" column="c_id" jdbcType="INTEGER"/>
+        <result property="message" column="message" jdbcType="VARCHAR"/>
+        <result property="pId" column="p_id" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="time" column="time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 查询课程的个数   -->
+    <select id="countCourse" resultType="java.lang.Integer">
+        select count(c_id) from db_hospital.tb_course
+    </select>
+    <!--模糊查询个数    -->
+    <select id="countByLike" resultType="java.lang.Integer">
+        select count(c_id) from tb_course
+        where
+        tb_course.title like concat("%",#{value},"%")
+        or tb_course.message like concat("%",#{value},"%")
+    </select>
+
+    <!--模糊查询 根据标题   -->
+    <select id="queryByLikeTitle" resultMap="TbCourseMap">
+        select
+          c_id, message, c.p_id, c.title, time,url
+        from db_hospital.tb_course c,db_hospital.tb_pic p
+        where
+        c.title like concat("%",#{value},"%")
+        and c.p_id=p.p_id
+    </select>
+
+    <!--模糊查询    -->
+    <select id="queryByLike" resultMap="TbCourseMap">
+        select
+          c_id, message, c.p_id, c.title, time,url
+        from db_hospital.tb_course c,db_hospital.tb_pic p
+        where
+        c.title like concat("%",#{value},"%")
+        and c.p_id=p.p_id
+        or c.message like concat("%",#{value},"%")
+        and c.p_id=p.p_id
+        limit #{page},#{limit}
+    </select>
+
+    <!--查询指定行数据 别名：查询所有-->
+    <select id="queryAllByLimit" resultMap="TbCourseMap">
+        select
+          c_id, message,c.p_id, c.title, time,url
+        from db_hospital.tb_course c,db_hospital.tb_pic p
+        WHERE c.p_id=p.p_id
+        limit #{offset}, #{limit}
+    </select>
+
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="TbCourseMap">
+        select
+          c_id, message,c.p_id, c.title, time,url
+        from db_hospital.tb_course c,db_hospital.tb_pic p
+        where c.p_id=p.p_id and c_id = #{cId}
+    </select>
+
+
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="TbCourseMap">
+        select
+        c_id, message, p_id, title, time
+        from db_hospital.tb_course
+        <where>
+            <if test="cId != null">
+                and c_id = #{cId}
+            </if>
+            <if test="message != null and message != ''">
+                and message = #{message}
+            </if>
+            <if test="pId != null">
+                and p_id = #{pId}
+            </if>
+            <if test="title != null and title != ''">
+                and title = #{title}
+            </if>
+            <if test="time != null">
+                and time = #{time}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="cId" useGeneratedKeys="true">
+        insert into db_hospital.tb_course(message, p_id, title, time)
+        values (#{message}, #{pId}, #{title}, #{time})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="cId" useGeneratedKeys="true">
+        insert into db_hospital.tb_course(message, p_id, title, time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.message}, #{entity.pId}, #{entity.title}, #{entity.time})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="cId" useGeneratedKeys="true">
+        insert into db_hospital.tb_course(message, p_id, title, time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.message}, #{entity.pId}, #{entity.title}, #{entity.time})
+        </foreach>
+        on duplicate key update
+        message = values(message) , p_id = values(p_id) , title = values(title) , time = values(time)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update db_hospital.tb_course
+        <set>
+            <if test="message != null and message != ''">
+                message = #{message},
+            </if>
+            <if test="pId != null">
+                p_id = #{pId},
+            </if>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="time != null">
+                time = #{time},
+            </if>
+        </set>
+        where c_id = #{cId}
+    </update>
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from db_hospital.tb_course where c_id = #{cId}
+    </delete>
+
+
+</mapper>

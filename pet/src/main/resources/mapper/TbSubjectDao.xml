@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.c.pet.dao.TbSubjectDao">
+
+    <resultMap type="com.c.pet.entity.TbSubject" id="TbSubjectMap">
+        <result property="suId" column="su_id" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="detail" column="detail" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="NUMERIC"/>
+        <result property="rep" column="rep" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="pId" column="p_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="TbSubjectMap">
+        select
+          su_id, title, detail, price, rep, name, url
+        from db_hospital.tb_subject
+        where su_id = #{suId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="TbSubjectMap">
+        select
+          su_id, title, detail, price, rep, name, url
+        from db_hospital.tb_subject
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="TbSubjectMap">
+        select
+        su_id, title, detail, price, rep, name, url
+        from db_hospital.tb_subject
+        <where>
+            <if test="suId != null">
+                and su_id = #{suId}
+            </if>
+            <if test="title != null and title != ''">
+                and title = #{title}
+            </if>
+            <if test="detail != null and detail != ''">
+                and detail = #{detail}
+            </if>
+            <if test="price != null">
+                and price = #{price}
+            </if>
+            <if test="rep != null and rep != ''">
+                and rep = #{rep}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="pId != null">
+                and p_id = #{pId}
+            </if>
+            <if test="url != null and url != ''">
+                and url = #{url}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="suId" useGeneratedKeys="true">
+        insert into db_hospital.tb_subject(title, detail, price, rep, name, url)
+        values (#{title}, #{detail}, #{price}, #{rep}, #{name}, #{url})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update db_hospital.tb_subject
+        <set>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="detail != null and detail != ''">
+                detail = #{detail},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="rep != null and rep != ''">
+                rep = #{rep},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="pId != null">
+                p_id = #{pId},
+            </if>
+        </set>
+        where su_id = #{suId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from db_hospital.tb_subject where su_id = #{suId}
+    </delete>
+
+    <select id="countSub" resultType="java.lang.Integer">
+        select count(su_id) from db_hospital.tb_subject
+    </select>
+
+    <!--模糊查询-->
+    <select id="countByLike" resultType="java.lang.Integer">
+        select count(su_id) from tb_subject
+        where tb_subject.title like concat("%",#{value},"%")
+        or tb_subject.name like concat("%",#{value},"%")
+    </select>
+
+    <select id="queryByLike" resultMap="TbSubjectMap">
+        select
+          su_id, title, detail, price, rep, name, url
+        from db_hospital.tb_subject
+         where
+        tb_subject.title like concat("%",#{value},"%")
+        or tb_subject.name like concat("%",#{value},"%")
+        limit #{page},#{limit}
+    </select>
+
+    <select id="queryByTitle" parameterType="java.lang.String" resultMap="TbSubjectMap">
+        select
+        su_id, title, detail, price, rep, name, url
+        from db_hospital.tb_subject
+        <where>
+            <if test="title != '推荐'">
+                title = #{title}
+            </if>
+        </where>
+    </select>
+
+
+
+</mapper>

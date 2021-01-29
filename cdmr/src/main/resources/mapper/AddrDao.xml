@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qf.cdmr.dao.AddrDao">
+
+    <resultMap type="com.qf.cdmr.entity.Addr" id="AddrMap">
+        <result property="aId" column="a_id" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="tel" column="tel" jdbcType="VARCHAR"/>
+        <result property="uname" column="uname" jdbcType="VARCHAR"/>
+        <result property="sId" column="s_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="AddrMap">
+        select
+          a_id, title, tel, uname, s_id
+        from mr.addr
+        where a_id = #{aId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="AddrMap">
+        select
+          a_id, title, tel, uname, s_id
+        from mr.addr
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="AddrMap">
+        select
+        a_id, title, tel, uname, s_id
+        from mr.addr
+        <where>
+            <if test="aId != null">
+                and a_id = #{aId}
+            </if>
+            <if test="title != null and title != ''">
+                and title = #{title}
+            </if>
+            <if test="tel != null and tel != ''">
+                and tel = #{tel}
+            </if>
+            <if test="uname != null and uname != ''">
+                and uname = #{uname}
+            </if>
+            <if test="sId != null">
+                and s_id = #{sId}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="aId" useGeneratedKeys="true">
+        insert into mr.addr(title, tel, uname, s_id)
+        values (#{title}, #{tel}, #{uname}, #{sId})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="aId" useGeneratedKeys="true">
+        insert into mr.addr(title, tel, uname, s_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.title}, #{entity.tel}, #{entity.uname}, #{entity.sId})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="aId" useGeneratedKeys="true">
+        insert into mr.addr(title, tel, uname, s_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.title}, #{entity.tel}, #{entity.uname}, #{entity.sId})
+        </foreach>
+        on duplicate key update
+        title = values(title) , tel = values(tel) , uname = values(uname) , s_id = values(s_id)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update mr.addr
+        <set>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="tel != null and tel != ''">
+                tel = #{tel},
+            </if>
+            <if test="uname != null and uname != ''">
+                uname = #{uname},
+            </if>
+            <if test="sId != null">
+                s_id = #{sId},
+            </if>
+        </set>
+        where a_id = #{aId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from mr.addr where a_id = #{aId}
+    </delete>
+
+    <select id="queryByUname" parameterType="java.lang.Integer" resultMap="AddrMap">
+        select
+          addr.a_id, title, tel, uname
+        from addr,user_addr ua
+        where ua.u_id=#{uId} and ua.a_id = addr.a_id
+    </select>
+
+</mapper>

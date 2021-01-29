@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qf.cdmr.dao.SysUserDao">
+
+    <resultMap type="com.qf.cdmr.entity.SysUser" id="SysUserMap">
+        <result property="uId" column="u_id" jdbcType="INTEGER"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="pId" column="p_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="queryByUname" resultMap="SysUserMap">
+        select
+          u_id, username, password, p_id
+        from mr.sys_user
+        where username = #{uname}
+    </select>
+
+
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="SysUserMap">
+        select
+          u_id, username, password, p_id
+        from mr.sys_user
+        where u_id = #{uId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="SysUserMap">
+        select
+          u_id, username, password, p_id
+        from mr.sys_user
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="SysUserMap">
+        select
+        u_id, username, password, p_id
+        from mr.sys_user
+        <where>
+            <if test="uId != null">
+                and u_id = #{uId}
+            </if>
+            <if test="username != null and username != ''">
+                and username = #{username}
+            </if>
+            <if test="password != null and password != ''">
+                and password = #{password}
+            </if>
+            <if test="pId != null">
+                and p_id = #{pId}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="uId" useGeneratedKeys="true">
+        insert into mr.sys_user(username, password, p_id)
+        values (#{username}, #{password}, #{pId})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="uId" useGeneratedKeys="true">
+        insert into mr.sys_user(username, password, p_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.username}, #{entity.password}, #{entity.pId})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="uId" useGeneratedKeys="true">
+        insert into mr.sys_user(username, password, p_id)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.username}, #{entity.password}, #{entity.pId})
+        </foreach>
+        on duplicate key update
+        username = values(username) , password = values(password) , p_id = values(p_id)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update mr.sys_user
+        <set>
+            <if test="username != null and username != ''">
+                username = #{username},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="pId != null">
+                p_id = #{pId},
+            </if>
+        </set>
+        where u_id = #{uId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from mr.sys_user where u_id = #{uId}
+    </delete>
+
+</mapper>

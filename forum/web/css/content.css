@@ -1,0 +1,40 @@
+.uid{
+    margin-left: 20px;
+    font-size:15px ;
+}
+
+.pic{
+    margin-top: 30px;
+    margin-left: 20px;
+    background-size: 50px,50px;
+}
+.neironglie{
+    position: absolute;
+    margin-left: 7%;
+    margin-top: -40px;
+    width: 800px
+}
+.title{
+    margin-left: 80px;
+    font-size:20px ;
+    position: absolute;
+}
+
+.content{
+    height: 80px;
+    font-size:14px ;
+    margin-left: 80px;
+    margin-top: 30px;
+    position: absolute;
+}
+
+.comment{
+    font-size:14px ;
+    margin-left: 80px;
+    margin-top: 120px;
+}
+
+.reply{
+    font-size:14px ;
+    margin-left: 80px;
+}

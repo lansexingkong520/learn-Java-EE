@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>order</title>
+    <link rel="stylesheet" type="text/css" href="layui/css/layui.css"/>
+</head>
+
+<body>
+<!--搜索栏-->
+<div class="demoTable">
+    <div class="layui-inline">
+        <input class="layui-input" name="conditions" id="conditions" autocomplete="off">
+    </div>
+    <button class="layui-btn" id="search">搜索</button>
+</div>
+<!--点击搜索
+获取input值
+向服务器发送请求
+重新渲染table-->
+<table class="layui-hide" id="order" lay-filter="test"></table>
+<script type="textml" id="barDemo">
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+
+
+
+
+
+</script>
+<!--自定义头工具栏-->
+<script type="textml" id="toolbarDemo">
+    <button type="button" lay-event="del" class="layui-btn layui-btn-primary layui-btn-sm">
+        <i class="layui-icon">&#xe640;</i>
+    </button>
+
+
+
+
+
+</script>
+</body>
+<script type="text/javascript" src="layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['table', 'form'], function () {
+        var table = layui.table,
+            form = layui.form,
+            $ = layui.jquery;
+        //执行一个 table 实例
+        var tableIns = table.render({
+            elem: '#order',
+            height: 600,
+            url: 'http://localhost:8080/order/queryAll' //数据接口
+            ,
+            title: '预约信息',
+            page: true //开启分页
+            ,
+            toolbar: '#toolbarDemo' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            ,
+            cols: [
+                [ //表头
+                    {
+                        type: 'checkbox',
+                        fixed: 'left'
+                    }, {
+                    field: 'o_id',
+                    title: 'ID',
+                    sort: true,
+                    fixed: 'left',
+                    align: 'center'
+                }, {
+                    field: 'message',
+                    title: '留言',
+                    align: 'center',
+                    edit: 'text'
+                }, {
+                    field: 'dur',
+                    title: '预约时间',
+                    align: 'center',
+
+                }, {
+                    field: 'title',
+                    title: '地址',
+                    align: 'center',
+                    edit: 'text'
+                }, {
+                    field: 'uname',
+                    title: '用户',
+                    align: 'center'
+                }, {
+                    field: 'tel',
+                    title: '联系方式',
+                    align: 'center'
+                }, {
+                    field: 'url',
+                    title: '图片',
+                    align: 'center',
+                    templet:function (res) {
+                        return '<img src="'+res.url+'" width="100px" height="100px"/>'
+                    },
+                }, {
+                    fixed: 'right',
+                    width: 165,
+                    align: 'center',
+                    title: '操作',
+                    toolbar: '#barDemo'
+                }
+                ]
+            ]
+        });
+
+        //监听锁定操作
+        form.on('checkbox(lockDemo)', function (obj) {
+            //当前数据的id 当前数据被修改的值
+            var pid = obj.value
+            //数据被修改后的状态值
+            var status = obj.elem.checked == false ? 0 : 1;
+            //访问服务器 AJAX 使用jQuery的ajax
+            $.ajax({
+                type: "PATCH", //请求方式
+                url: "http://localhost:8080/pic/updatePic", //请求地址
+                dataType: 'json',  //后台返回的数据类型
+                contentType: 'application/json', //前端传json数据
+                data: JSON.stringify({
+                    'pid': pid,
+                    'status': status
+                }),
+                success: function (res) {
+                    //请求成功以后的回调函数
+                    if (res.code == 200) {
+                        layer.msg(res.msg, {icon: 1})
+                    } else {
+                        layer.msg(res.msg, {icon: 2})
+                    }
+                }
+            })
+        });
+
+        //监听单元格在线编辑
+        table.on('edit(test)', function (obj) {
+            var value = obj.value //得到修改后的值
+                , data = obj.data //得到所在行所有键值
+                , field = obj.field; //得到字段
+            //向服务器发送请求
+            $.ajax({
+                type: "PATCH",
+                url: "http://localhost:8080/pic/updatePic",
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    'field': field,
+                    'pid': data.pid,
+                    'value': value
+                }),
+                success: function (res) {
+                    //请求成功以后的回调函数
+                    if (res.code == 200) {
+                        layer.msg(res.msg, {icon: 1})
+                    } else {
+                        layer.msg(res.msg, {icon: 2})
+                    }
+                }
+            })
+        });
+
+        //监听行工具事件
+        table.on('tool(test)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                , layEvent = obj.event; //获得 lay-event 对应的值
+            if (layEvent === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    layer.close(index);
+                    //向服务端发送删除指令
+                    $.ajax({
+                        type: "DELETE",
+                        url: "http://localhost:8080/pic/delPic/" + data.pid,
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        success: function (res) {
+                            //请求成功以后的回调函数
+                            if (res.code == 200) {
+                                obj.del(); //删除对应行（tr）的DOM结构
+                                layer.msg(res.msg, {icon: 1})
+                            } else {
+                                layer.msg(res.msg, {icon: 2})
+                            }
+                        }
+                    })
+                });
+            }
+        });
+
+        //table重载
+        $("#search").on('click', function () {
+            tableIns.reload({
+                url: "http://localhost:8080/pic/queryByLike/",
+                where: { //设定异步数据接口的额外参数，任意设
+                    value: $("#conditions").val()
+                }
+                , page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            });
+        })
+    })
+</script>
+
+</html>
